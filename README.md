@@ -1,42 +1,104 @@
-# Voice Clone Demo
+# Trabalho de Clonagem de Voz
 
-Demo local de clonagem de voz com Gradio e Chatterbox Multilingual TTS.
+Demo local de clonagem de voz com **Gradio** e **Chatterbox Multilingual TTS**.
 
-O app usa portugues como idioma padrao (`language_id="pt"`). O usuario pode gravar audio pelo microfone, selecionar o microfone, enviar um arquivo, digitar um texto e gerar um WAV em `outputs/voz_clonada.wav`.
+O aplicativo usa português como idioma padrão (`language_id="pt"`). O usuário pode gravar áudio pelo microfone, selecionar o microfone, enviar um arquivo, digitar um texto e gerar um WAV em `outputs/voz_clonada.wav`.
 
-## Aviso etico
+## Resumo para apresentação
 
-Use somente a sua propria voz ou uma voz com autorizacao clara. Nao use este projeto para imitar pessoas sem consentimento, produzir fraude, assedio, desinformacao ou qualquer conteudo que possa causar dano.
+Este trabalho demonstra um pipeline simples de clonagem de voz local:
 
-## Como funciona
+1. O usuário grava ou envia uma voz de referência.
+2. O áudio é salvo temporariamente em `outputs/referencia_usuario.wav`.
+3. O texto digitado é enviado para o modelo **Chatterbox Multilingual TTS**.
+4. O modelo usa a voz de referência como prompt vocal e gera uma nova fala em português.
+5. O resultado final é salvo em `outputs/voz_clonada.wav`.
 
-- O front-end em Gradio usa HTML, CSS e JavaScript para gravar audio no navegador.
-- A gravacao ou upload vira um arquivo temporario em `outputs/referencia_usuario.wav`.
-- O Chatterbox Multilingual TTS roda localmente no computador.
-- Os pesos do modelo ficam em `.models/chatterbox`.
-- Cada geracao sobrescreve `outputs/voz_clonada.wav`.
-- O app nao usa API paga, login, banco de dados ou armazenamento permanente de vozes.
+O objetivo do projeto é mostrar, de forma prática, como um modelo de TTS multilíngue pode usar uma amostra curta de voz para sintetizar um novo áudio com características parecidas.
+
+## Modelo utilizado
+
+O modelo usado é:
+
+```text
+Chatterbox Multilingual TTS
+```
+
+Configuração principal:
+
+```python
+language_id = "pt"
+```
+
+O modelo roda localmente no computador. Não usamos ElevenLabs, NVIDIA, API paga, serviço externo pago, login, banco de dados ou armazenamento permanente de vozes.
+
+## Como fizemos
+
+### Interface
+
+A interface foi feita com **Gradio**, usando HTML, CSS e JavaScript customizados para melhorar a experiência:
+
+- seleção de microfone;
+- gravação pelo navegador;
+- medidor visual de áudio ao vivo;
+- upload de arquivo de áudio;
+- campo de texto em português;
+- player para ouvir a referência;
+- player para ouvir o WAV clonado.
+
+### Captura de áudio
+
+No navegador, usamos `navigator.mediaDevices.getUserMedia()` para acessar o microfone. A gravação é convertida para WAV no próprio front-end e enviada ao backend como `data URL`.
+
+### Backend
+
+O backend em Python valida:
+
+- texto vazio;
+- áudio ausente;
+- arquivo de áudio inexistente;
+- áudio vazio.
+
+Depois disso, o serviço de TTS carrega o Chatterbox e gera a voz clonada.
+
+### Geração da voz
+
+O Chatterbox recebe:
+
+- o texto digitado;
+- o caminho do áudio de referência;
+- o idioma `pt`.
+
+O áudio final é salvo sempre em:
+
+```text
+outputs/voz_clonada.wav
+```
+
+## Aviso ético
+
+Use somente a sua própria voz ou uma voz com autorização clara. Não use este projeto para imitar pessoas sem consentimento, produzir fraude, assédio, desinformação ou qualquer conteúdo que possa causar dano.
 
 ## Requisitos
 
 - Python 3.10 ou 3.11 recomendado.
 - Internet no primeiro uso para baixar os pesos gratuitos do Chatterbox.
 - Cerca de 3 GB livres para os pesos do modelo em `.models/chatterbox`.
-- GPU acelera bastante, mas CPU tambem funciona com mais paciencia.
+- GPU acelera bastante, mas CPU também funciona com mais paciência.
 
-## Rodando apos clonar o repositorio
+## Rodando após clonar o repositório
 
-Clone o repositorio:
+Clone o repositório:
 
 ```bash
 git clone <url-do-repositorio>
-cd voice-clone-demo
+cd voice-clone-app
 ```
 
-Se o repositorio clonado tiver varias pastas e `voice-clone-demo` estiver dentro dele, entre na pasta do projeto:
+Se o repositório clonado tiver várias pastas e `voice-clone-app` estiver dentro dele, entre na pasta do projeto:
 
 ```bash
-cd voice-clone-demo
+cd voice-clone-app
 ```
 
 ### Windows PowerShell
@@ -49,7 +111,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe app.py
 ```
 
-Abra o endereco exibido pelo Gradio, normalmente:
+Abra o endereço exibido pelo Gradio, normalmente:
 
 ```text
 http://127.0.0.1:7860
@@ -66,7 +128,7 @@ python -m pytest -p no:cacheprovider
 python app.py
 ```
 
-Abra o endereco exibido pelo Gradio, normalmente:
+Abra o endereço exibido pelo Gradio, normalmente:
 
 ```text
 http://127.0.0.1:7860
@@ -74,56 +136,36 @@ http://127.0.0.1:7860
 
 ## Primeiro uso
 
-Na primeira geracao, o app pode baixar os pesos do Chatterbox para:
+Na primeira geração, o app pode baixar os pesos do Chatterbox para:
 
 ```text
 .models/chatterbox
 ```
 
-Esse download e grande, em torno de 3 GB. Ele nao e baixado a cada geracao. Depois que os arquivos estao no disco, o app reutiliza o modelo local.
+Esse download é grande, em torno de 3 GB. Ele não é baixado a cada geração. Depois que os arquivos estão no disco, o app reutiliza o modelo local.
 
 ## Como usar
 
 1. Escolha o microfone no seletor `Microfone`.
 2. Se a lista estiver vazia, clique em `Atualizar` e permita o microfone no navegador.
-3. Clique em `Iniciar gravacao`, fale por alguns segundos e depois clique em `Parar gravacao`.
-4. Use `Ouvir previa` ou o player nativo para conferir a referencia.
-5. Digite o texto em portugues.
+3. Clique em `Iniciar gravação`, fale por alguns segundos e depois clique em `Parar gravação`.
+4. Use `Ouvir prévia` ou o player nativo para conferir a referência.
+5. Digite o texto em português.
 6. Clique em `Gerar WAV Clonado`.
-7. Ouca o resultado no player de saida.
+7. Ouça o resultado no player de saída.
 
-O arquivo final e salvo sempre em:
+## Limitações
 
-```text
-outputs/voz_clonada.wav
-```
-
-## Uso em Colab
-
-1. Clone o repositorio no Colab.
-2. Entre na pasta `voice-clone-demo`.
-3. Rode:
-
-```bash
-pip install -r requirements.txt
-pytest -p no:cacheprovider
-GRADIO_SHARE=1 python app.py
-```
-
-No Colab, `GRADIO_SHARE=1` cria um link publico temporario do Gradio. Use esse link apenas para demonstracoes controladas e nunca envie audio de terceiros sem autorizacao.
-
-## Limitacoes
-
-- A qualidade depende muito do audio de referencia.
-- Audio com ruido, musica, eco ou varias pessoas falando pode gerar resultados ruins.
-- A primeira geracao pode demorar porque o modelo precisa ser carregado.
-- Em CPU, a geracao pode ser lenta.
-- O demo foi feito para sala de aula e apresentacoes locais, nao para producao.
+- A qualidade depende muito do áudio de referência.
+- Áudio com ruído, música, eco ou várias pessoas falando pode gerar resultados ruins.
+- A primeira geração pode demorar porque o modelo precisa ser carregado.
+- Em CPU, a geração pode ser lenta.
+- O demo foi feito para sala de aula e apresentações locais, não para produção.
 
 ## Estrutura
 
 ```text
-voice-clone-demo/
+voice-clone-app/
   app.py
   requirements.txt
   README.md

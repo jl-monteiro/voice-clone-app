@@ -1,6 +1,7 @@
 .venv/
 .cache/
 .models/
+.gradio/
 .tmp/
 __pycache__/
 .pytest_cache/

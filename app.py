@@ -60,6 +60,40 @@ RECORDER_HTML = """
 </section>
 """
 
+PRESENTATION_HTML = """
+<section class="presentation-panel" aria-label="Como o projeto foi implementado">
+  <div class="card-header">
+    <div>
+      <p class="section-kicker">Como fizemos</p>
+      <h2 class="card-title">Pipeline local com Chatterbox Multilingual TTS</h2>
+      <p class="card-description">Resumo técnico para apresentação do trabalho.</p>
+    </div>
+  </div>
+  <div class="info-grid">
+    <article class="info-item">
+      <span class="info-label">Modelo</span>
+      <strong>Chatterbox Multilingual TTS</strong>
+      <p>Usado com <code>language_id="pt"</code> para síntese em português.</p>
+    </article>
+    <article class="info-item">
+      <span class="info-label">Execução</span>
+      <strong>Inferência local</strong>
+      <p>O modelo roda no computador, sem API paga e sem serviço externo.</p>
+    </article>
+    <article class="info-item">
+      <span class="info-label">Fluxo</span>
+      <strong>Voz de referência → texto → WAV</strong>
+      <p>O áudio gravado condiciona o timbre; o texto define o conteúdo falado.</p>
+    </article>
+    <article class="info-item">
+      <span class="info-label">Privacidade</span>
+      <strong>Sem cadastro de vozes</strong>
+      <p>Não há login, banco de dados ou armazenamento permanente de perfis vocais.</p>
+    </article>
+  </div>
+</section>
+"""
+
 APP_JS = r"""
 () => {
   const findElementById = (id, root = document) => {
@@ -682,6 +716,41 @@ body {
   text-transform: uppercase;
 }
 
+.ethics-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  box-shadow: var(--shadow-card);
+}
+
+.ethics-strip strong,
+.ethics-strip span {
+  color: var(--foreground);
+}
+
+.ethics-strip strong {
+  flex: 0 0 auto;
+  font-weight: 800;
+}
+
+.ethics-strip code {
+  border: 1px solid var(--border);
+  background: var(--muted);
+  border-radius: 0.375rem;
+  padding: 0.0625rem var(--space-1);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
 .app-grid {
   align-items: stretch;
   gap: var(--space-5) !important;
@@ -695,6 +764,63 @@ body {
   border-radius: var(--radius);
   padding: var(--space-5);
   box-shadow: var(--shadow-pop);
+}
+
+.presentation-panel {
+  margin-top: var(--space-5);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.info-item {
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.info-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.info-item strong {
+  display: block;
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+
+.info-item p {
+  margin: var(--space-2) 0 0;
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.info-item code {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 0.375rem;
+  padding: 0.0625rem var(--space-1);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
 }
 
 .tool-panel h2,
@@ -721,7 +847,7 @@ body {
 
 .card-description {
   margin: var(--space-1) 0 0;
-  color: var(--muted-foreground);
+  color: var(--foreground);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -1037,6 +1163,10 @@ footer,
     grid-template-columns: 1fr;
   }
 
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
   .ui-button,
   .recorder-actions label {
     width: 100%;
@@ -1091,7 +1221,7 @@ def _generate_audio(text: str | None, reference_audio_path: str | None) -> tuple
 
 
 def build_interface() -> gr.Blocks:
-    blocks_kwargs = {"title": "Clone de voz PT"}
+    blocks_kwargs = {"title": "Trabalho de Clonagem de Voz"}
     if not _is_gradio_v6_or_newer():
         blocks_kwargs.update({"theme": THEME, "css": CSS, "js": APP_JS, "head": APP_HEAD})
 
@@ -1100,17 +1230,25 @@ def build_interface() -> gr.Blocks:
             """
             <header id="app-header">
               <div class="brand-lockup">
-                <div class="brand-mark" aria-hidden="true">VC</div>
+                <div class="brand-mark" aria-hidden="true">TC</div>
                 <div>
-                  <p class="section-kicker">Demo local</p>
-                  <h1>Voice Clone Studio</h1>
+                  <p class="section-kicker">Demo local de clonagem de voz</p>
+                  <h1>Trabalho de Clonagem de Voz</h1>
                 </div>
               </div>
               <div class="header-actions" aria-label="Contexto do app">
-                <span class="ui-badge ui-badge-secondary">Chatterbox</span>
-                <span class="ui-badge">PT local</span>
+                <span class="ui-badge ui-badge-secondary">Modelo local</span>
+                <span class="ui-badge">Português</span>
               </div>
             </header>
+            """
+        )
+        gr.HTML(
+            """
+            <div class="ethics-strip" role="alert">
+              <strong>Modelo utilizado</strong>
+              <span>Foi usado o modelo Chatterbox Multilingual TTS, rodando localmente no computador com <code>language_id="pt"</code>. A interface foi feita com Gradio e o áudio final é gerado em WAV, sem uso de APIs pagas.</span>
+            </div>
             """
         )
         reference_payload = gr.Textbox(
@@ -1152,7 +1290,7 @@ def build_interface() -> gr.Blocks:
                     variant="primary",
                     elem_id="generate-button",
                 )
-                generation_status = gr.HTML(_status("Resultado aguardando geracao.", "muted"))
+                generation_status = gr.HTML(_status("Resultado aguardando geração.", "muted"))
                 output_audio = gr.Audio(
                     label="Áudio clonado",
                     type="filepath",
@@ -1161,6 +1299,8 @@ def build_interface() -> gr.Blocks:
                     visible=False,
                     elem_id="output-audio",
                 )
+
+        gr.HTML(PRESENTATION_HTML)
 
         reference_payload.change(
             fn=_prepare_reference_audio,

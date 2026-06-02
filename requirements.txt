@@ -1,0 +1,6 @@
+gradio>=5.0,<7.0
+chatterbox-tts>=0.1.4
+setuptools>=70,<81
+torch>=2.3
+torchaudio>=2.3
+pytest>=8.0

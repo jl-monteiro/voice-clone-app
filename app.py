@@ -7,12 +7,6 @@ import gradio as gr
 from src.audio_utils import save_reference_audio_from_data_url, validate_audio_path
 from src.tts_service import OUTPUT_DIR, generate_cloned_voice
 
-
-ETHICAL_NOTICE = (
-    "Use somente a sua propria voz ou uma voz com autorizacao clara. "
-    "Nao use este demo para imitar pessoas sem consentimento."
-)
-
 THEME = gr.themes.Base()
 
 RECORDER_HTML = """
@@ -20,8 +14,8 @@ RECORDER_HTML = """
   <div class="card-header">
     <div>
       <p class="section-kicker">Entrada de voz</p>
-      <h2 class="card-title">Voz de referencia</h2>
-      <p class="card-description">Grave uma amostra curta e confira a previa antes de gerar.</p>
+      <h2 class="card-title">Voz de referência</h2>
+      <p class="card-description">Grave uma amostra curta e confira a prévia antes de gerar.</p>
     </div>
     <span id="mic-state" class="ui-badge" aria-live="polite">Pronto</span>
   </div>
@@ -30,7 +24,6 @@ RECORDER_HTML = """
     <canvas id="voice-meter" role="img" aria-label="Medidor visual do microfone"></canvas>
     <div class="meter-footer">
       <span id="recording-time">00:00</span>
-      <span id="recording-hint">O desenho reage enquanto voce fala.</span>
     </div>
   </div>
 
@@ -38,7 +31,7 @@ RECORDER_HTML = """
     <label class="field-label" for="microphone-select">Microfone</label>
     <div class="device-controls">
       <select id="microphone-select" class="ui-select" name="microphone_device" aria-label="Selecionar microfone">
-        <option value="">Microfone padrao</option>
+        <option value="">Microfone padrão</option>
       </select>
       <button id="refresh-microphones" class="ui-button ui-button-outline" type="button">
         Atualizar
@@ -48,21 +41,21 @@ RECORDER_HTML = """
 
   <div class="recorder-actions" aria-label="Controles do gravador">
     <button id="record-toggle" class="ui-button ui-button-primary" type="button">
-      Iniciar gravacao
+      Iniciar gravação
     </button>
     <button id="play-reference" class="ui-button ui-button-secondary" type="button" disabled>
-      Ouvir previa
+      Ouvir prévia
     </button>
     <label class="ui-button ui-button-outline" for="audio-upload">
-      Enviar audio
+      Enviar áudio
     </label>
-    <input id="audio-upload" class="file-input" name="reference_audio_file" type="file" accept="audio/*" aria-label="Enviar arquivo de audio" />
+    <input id="audio-upload" class="file-input" name="reference_audio_file" type="file" accept="audio/*" aria-label="Enviar arquivo de áudio" />
   </div>
 
-  <audio id="reference-player" class="native-audio" controls preload="metadata" aria-label="Preview da voz gravada"></audio>
+  <audio id="reference-player" class="native-audio" controls preload="metadata" aria-label="Prévia da voz gravada"></audio>
 
   <p id="recorder-message" class="recorder-message" aria-live="polite">
-    Clique em Iniciar Gravacao, permita o microfone e fale por alguns segundos.
+    Clique em Iniciar Gravação, permita o microfone e fale por alguns segundos.
   </p>
 </section>
 """
@@ -170,7 +163,7 @@ APP_JS = r"""
 
       const defaultOption = document.createElement("option");
       defaultOption.value = "";
-      defaultOption.textContent = "Microfone padrao";
+      defaultOption.textContent = "Microfone padrão";
       microphoneSelect.appendChild(defaultOption);
 
       devices.forEach((device, index) => {
@@ -187,7 +180,7 @@ APP_JS = r"""
 
     const listMicrophones = async (requestPermission = false) => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-        setMessage("Seu navegador nao permite listar microfones. Use Chrome, Edge ou Firefox atualizado.", "error");
+        setMessage("Seu navegador não permite listar microfones. Use Chrome, Edge ou Firefox atualizado.", "error");
         return;
       }
 
@@ -202,12 +195,12 @@ APP_JS = r"""
         setMicrophoneOptions(microphones);
 
         if (microphones.length === 0) {
-          setMessage("Nenhum microfone encontrado. Confira se o dispositivo esta conectado.", "error");
+          setMessage("Nenhum microfone encontrado. Confira se o dispositivo está conectado.", "error");
         } else if (requestPermission) {
           setMessage("Lista de microfones atualizada. Escolha a entrada antes de gravar.", "ok");
         }
       } catch (error) {
-        setMessage("Nao consegui listar os microfones. Permita o microfone no navegador e tente atualizar.", "error");
+        setMessage("Não consegui listar os microfones. Permita o microfone no navegador e tente atualizar.", "error");
       }
     };
 
@@ -386,7 +379,7 @@ APP_JS = r"""
       }
 
       isRecording = false;
-      recordButton.textContent = "Iniciar gravacao";
+      recordButton.textContent = "Iniciar gravação";
       setState("Processando");
       if (animationId) {
         window.cancelAnimationFrame(animationId);
@@ -397,7 +390,7 @@ APP_JS = r"""
       await stopStream();
 
       if (recordedSamples < sampleRate / 2) {
-        setMessage("Audio muito curto. Grave pelo menos 1 segundo de fala.", "error");
+        setMessage("Áudio muito curto. Grave pelo menos 1 segundo de fala.", "error");
         setState("Pronto");
         drawIdle();
         return;
@@ -410,14 +403,14 @@ APP_JS = r"""
       updatePlayerSource(objectUrl);
       playButton.disabled = false;
       setPayload(await blobToDataUrl(blob));
-      setMessage("Gravacao pronta. Clique em Ouvir Minha Voz para conferir.", "ok");
+      setMessage("Gravação pronta. Clique em Ouvir prévia para conferir.", "ok");
       setState("Pronto");
       drawIdle();
     };
 
     const startRecording = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setMessage("Seu navegador nao permite gravacao por microfone. Use Chrome, Edge ou Firefox atualizado.", "error");
+        setMessage("Seu navegador não permite gravação por microfone. Use Chrome, Edge ou Firefox atualizado.", "error");
         setState("Indisponivel");
         return;
       }
@@ -441,9 +434,9 @@ APP_JS = r"""
         await listMicrophones(false);
       } catch (error) {
         if (error && error.name === "OverconstrainedError") {
-          setMessage("Esse microfone nao esta disponivel agora. Atualize a lista e escolha outro.", "error");
+          setMessage("Esse microfone não está disponível agora. Atualize a lista e escolha outro.", "error");
         } else {
-          setMessage("Nao consegui acessar o microfone. Confira a permissao do navegador.", "error");
+          setMessage("Não consegui acessar o microfone. Confira a permissão do navegador.", "error");
         }
         setState("Bloqueado");
         return;
@@ -479,7 +472,7 @@ APP_JS = r"""
       player.load();
       playButton.disabled = true;
       setPayload("");
-      recordButton.textContent = "Parar gravacao";
+      recordButton.textContent = "Parar gravação";
       setMessage("Gravando agora. Fale perto do microfone.", "recording");
       setState("Gravando", true);
       resizeCanvas();
@@ -497,7 +490,7 @@ APP_JS = r"""
     if (microphoneSelect) {
       microphoneSelect.addEventListener("change", () => {
         lastSelectedMicrophoneId = microphoneSelect.value;
-        const selectedLabel = microphoneSelect.options[microphoneSelect.selectedIndex]?.textContent || "Microfone padrao";
+        const selectedLabel = microphoneSelect.options[microphoneSelect.selectedIndex]?.textContent || "Microfone padrão";
         setMessage(`Entrada selecionada: ${selectedLabel}.`, "ok");
       });
     }
@@ -521,7 +514,7 @@ APP_JS = r"""
       try {
         await player.play();
       } catch (error) {
-        setMessage("O navegador bloqueou o play automatico. Use o controle do player abaixo.", "error");
+        setMessage("O navegador bloqueou o play automático. Use o controle do player abaixo.", "error");
       }
     });
 
@@ -687,27 +680,6 @@ body {
   line-height: 1;
   letter-spacing: 0;
   text-transform: uppercase;
-}
-
-.ethics-strip {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  border: 1px solid #fed7aa;
-  background: var(--warning-soft);
-  color: #7c2d12;
-  border-radius: var(--radius);
-  padding: var(--space-3) var(--space-4);
-  margin: 0 0 var(--space-5);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  box-shadow: var(--shadow-card);
-}
-
-.ethics-strip strong {
-  flex: 0 0 auto;
-  color: #7c2d12;
-  font-weight: 700;
 }
 
 .app-grid {
@@ -1056,9 +1028,8 @@ footer,
     padding: var(--space-4);
   }
 
-  .card-header,
-  .ethics-strip,
-  .meter-footer {
+    .card-header,
+    .meter-footer {
     flex-direction: column;
   }
 
@@ -1096,7 +1067,7 @@ def _prepare_reference_audio(reference_payload: str | None) -> tuple[str, str | 
     return (
         _status(
             f"<strong>Voz pronta.</strong> Arquivo recebido como {Path(audio_path).name}. "
-            "Agora da para gerar o WAV clonado.",
+            "Agora dá para gerar o WAV clonado.",
             "ok",
         ),
         str(audio_path),
@@ -1109,14 +1080,14 @@ def _generate_audio(text: str | None, reference_audio_path: str | None) -> tuple
         output_path = generate_cloned_voice(text, reference_path)
         return (
             gr.update(value=output_path, visible=True),
-            _status("<strong>Audio gerado.</strong> Salvo em outputs/voz_clonada.wav.", "ok"),
+            _status("<strong>Áudio gerado.</strong> Salvo em outputs/voz_clonada.wav.", "ok"),
         )
     except ValueError as exc:
         raise gr.Error(str(exc)) from exc
     except RuntimeError as exc:
         raise gr.Error(str(exc)) from exc
     except Exception as exc:
-        raise gr.Error(f"Nao foi possivel gerar o audio: {exc}") from exc
+        raise gr.Error(f"Não foi possível gerar o áudio: {exc}") from exc
 
 
 def build_interface() -> gr.Blocks:
@@ -1142,10 +1113,8 @@ def build_interface() -> gr.Blocks:
             </header>
             """
         )
-        gr.HTML(f"<div class='ethics-strip' role='alert'><strong>Aviso etico</strong><span>{ETHICAL_NOTICE}</span></div>")
-
         reference_payload = gr.Textbox(
-            label="Transporte interno do audio",
+          label="Transporte interno do áudio",
             show_label=False,
             lines=1,
             container=False,
@@ -1166,14 +1135,14 @@ def build_interface() -> gr.Blocks:
                       <div>
                         <p class="section-kicker">Saida sintetica</p>
                         <h2 class="card-title">Texto e resultado</h2>
-                        <p class="card-description">Escreva em portugues e gere um WAV com a voz de referencia.</p>
+                        <p class="card-description">Escreva em português e gere um WAV com a voz de referência.</p>
                       </div>
                     </div>
                     """
                 )
                 text = gr.Textbox(
-                    label="Texto em portugues",
-                    placeholder="Digite o texto que voce quer ouvir...",
+                    label="Texto em português",
+                    placeholder="Digite o texto que você quer ouvir...",
                     lines=8,
                     max_lines=12,
                     elem_id="prompt-text",
@@ -1185,7 +1154,7 @@ def build_interface() -> gr.Blocks:
                 )
                 generation_status = gr.HTML(_status("Resultado aguardando geracao.", "muted"))
                 output_audio = gr.Audio(
-                    label="Audio clonado",
+                    label="Áudio clonado",
                     type="filepath",
                     format="wav",
                     interactive=False,
